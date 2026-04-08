@@ -81,16 +81,16 @@ app.get("/patients", async (req, res) => {
 });
 
 // ADD patient
-app.post("/patients", async (req, res) => {
-  const { name, age, gender, phone } = req.body;
+// app.post("/patients", async (req, res) => {
+//   const { name, age, gender, phone } = req.body;
 
-  const result = await pool.query(
-    "INSERT INTO patients (name, age, gender, phone) VALUES ($1,$2,$3,$4) RETURNING *",
-    [name, age, gender, phone]
-  );
+//   const result = await pool.query(
+//     "INSERT INTO patients (name, age, gender, phone) VALUES ($1,$2,$3,$4) RETURNING *",
+//     [name, age, gender, phone]
+//   );
 
-  res.json(result.rows[0]);
-});
+//   res.json(result.rows[0]);
+// });
 
 app.get("/dashboard", async (req, res) => {
   const patients = await pool.query("SELECT COUNT(*) FROM patients");
@@ -117,6 +117,11 @@ app.post("/tests", async (req, res) => {
   res.json(result.rows[0]);
 });
 
+app.get("/tests", async (req, res) => {
+  const data = await pool.query("SELECT * FROM tests");
+  res.json(data.rows);
+});
+
 app.post("/assign-test", async (req, res) => {
   const { patient_id, test_id } = req.body;
 
@@ -131,6 +136,31 @@ app.post("/assign-test", async (req, res) => {
 
   res.json({ message: "Assigned" });
 });
+app.post("/patients", async (req, res) => {
+  const { name, age, gender, phone, tests } = req.body;
 
+  // 1. Insert patient
+  const patient = await pool.query(
+    "INSERT INTO patients (name, age, gender, phone) VALUES ($1,$2,$3,$4) RETURNING *",
+    [name, age, gender, phone]
+  );
+
+  const patientId = patient.rows[0].id;
+
+  // 2. Insert selected tests
+  for (let testId of tests) {
+    const test = await pool.query(
+      "SELECT price FROM tests WHERE id=$1",
+      [testId]
+    );
+
+    await pool.query(
+      "INSERT INTO patient_tests (patient_id, test_id, price) VALUES ($1,$2,$3)",
+      [patientId, testId, test.rows[0].price]
+    );
+  }
+
+  res.json({ message: "Patient + Tests Added" });
+});
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
