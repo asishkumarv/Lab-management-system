@@ -32,7 +32,7 @@ app.get("/patients", async (req, res) => {
 });
 
 // ADD patient
-app.post("/patient", async (req, res) => {
+app.post("/patients", async (req, res) => {
   const { name, age, gender, phone } = req.body;
 
   const result = await pool.query(
