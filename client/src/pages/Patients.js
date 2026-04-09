@@ -61,11 +61,35 @@ const addSelectedTest = () => {
     .reduce((sum, t) => sum + t.price, 0);
 
 const submit = async () => {
+  // 🔴 VALIDATION
+  if (!form.name || !form.age || !form.gender || !form.phone) {
+    alert("Please fill all patient details ❗");
+    return;
+  }
+
+  if (selectedTests.length === 0) {
+    alert("Please select at least one test ❗");
+    return;
+  }
+
+  // Optional: phone validation
+  if (form.phone.length < 10) {
+    alert("Enter valid phone number ❗");
+    return;
+  }
+
+  // Optional: age validation
+  if (form.age <= 0) {
+    alert("Enter valid age ❗");
+    return;
+  }
+
+  // ✅ If everything valid
   const res = await addPatient({ ...form, tests: selectedTests });
 
-  const patientId = res.data.patient_id;  // ✅ get ID
+  const patientId = res.data.patient_id;
 
-  generatePDF(patientId);  // pass ID
+  generatePDF(patientId);
 
   alert("Patient Added + PDF Generated");
 
@@ -134,6 +158,7 @@ doc.text(`Time: ${new Date().toLocaleTimeString()}`, 150, 50);
                   onChange={(e) =>
                     setForm({ ...form, name: e.target.value })
                   }
+                  required
                 />
               </Grid>
 
@@ -145,6 +170,7 @@ doc.text(`Time: ${new Date().toLocaleTimeString()}`, 150, 50);
                   onChange={(e) =>
                     setForm({ ...form, age: e.target.value })
                   }
+                  required
                 />
               </Grid>
 
@@ -155,6 +181,7 @@ doc.text(`Time: ${new Date().toLocaleTimeString()}`, 150, 50);
                   onChange={(e) =>
                     setForm({ ...form, gender: e.target.value })
                   }
+                  required
                 />
               </Grid>
 
@@ -165,6 +192,7 @@ doc.text(`Time: ${new Date().toLocaleTimeString()}`, 150, 50);
                   onChange={(e) =>
                     setForm({ ...form, phone: e.target.value })
                   }
+                  required
                 />
               </Grid>
             </Grid>

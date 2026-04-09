@@ -42,11 +42,40 @@ function Tests({ setPage, setAuth }) {
     setParameters(updated);
   };
 
-  const submit = async () => {
-    await addTest({ ...form, parameters });
-    alert("Test added successfully");
-    setPage("dashboard");
-  };
+const submit = async () => {
+  // 🔴 Validate main fields
+  if (!form.category || !form.test_name || !form.price) {
+    alert("Please fill all test details ❗");
+    return;
+  }
+
+  // 🔴 Validate price
+  if (form.price <= 0) {
+    alert("Enter valid price ❗");
+    return;
+  }
+
+  // 🔴 Validate parameters
+  if (parameters.length === 0) {
+    alert("Please add at least one parameter ❗");
+    return;
+  }
+
+  // 🔴 Validate each parameter
+  for (let i = 0; i < parameters.length; i++) {
+    if (!parameters[i].name || !parameters[i].value) {
+      alert(`Fill all fields in parameter ${i + 1} ❗`);
+      return;
+    }
+  }
+
+  // ✅ If valid
+  await addTest({ ...form, parameters });
+
+  alert("Test added successfully ✅");
+
+  setPage("dashboard");
+};
 
   return (
     <>
@@ -69,6 +98,7 @@ function Tests({ setPage, setAuth }) {
                 setForm({ ...form, category: e.target.value })
               }
               margin="normal"
+              required
             >
               {["Blood Tests", "Urine Tests", "Diabetes Tests", "Thyroid Tests", "Liver Function Tests", "Kidney Function Tests", "Other Tests"].map((cat) => (
                 <MenuItem key={cat} value={cat}>
@@ -86,6 +116,7 @@ function Tests({ setPage, setAuth }) {
                 setForm({ ...form, test_name: e.target.value })
               }
               margin="normal"
+              required
             />
 
             {/* Price */}
@@ -98,6 +129,7 @@ function Tests({ setPage, setAuth }) {
                 setForm({ ...form, price: e.target.value })
               }
               margin="normal"
+              required
             />
 
             {/* Parameters Section */}
