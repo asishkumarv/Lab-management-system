@@ -12,7 +12,7 @@ function Dashboard({ setAuth, goPatients, goTests, goViewPatients }) {
 
   return (
     <>
-      <Navbar setAuth={setAuth} />
+      <Navbar setAuth={setAuth} showLogout={true} />
 
       <div style={{ padding: "20px" }}>
         <h2>Dashboard</h2>

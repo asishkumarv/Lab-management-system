@@ -50,7 +50,7 @@ function Tests({ setPage, setAuth }) {
 
   return (
     <>
-      <Navbar setAuth={setAuth} />
+      <Navbar setAuth={setAuth} showLogout={true} />
 
       <Container maxWidth="sm" sx={{ mt: 4 }}>
         <Card elevation={4} sx={{ borderRadius: 3 }}>

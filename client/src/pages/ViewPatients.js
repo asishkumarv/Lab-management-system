@@ -7,7 +7,9 @@ import {
   getReport
 } from "../api";
 import Navbar from "../components/Navbar";
-
+import { IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   Dialog,
   DialogTitle,
@@ -54,7 +56,16 @@ function ViewPatients({ setAuth, goDashboard }) {
     setTests(res.data);
     setOpen(true);
   };
+const handleClose = () => {
+  setOpen(false);
 
+  // reset everything
+  setTests([]);
+  setParameters([]);
+  setResults({});
+  setReport(null);
+  setSelectedTest(null);
+};
   // 🔥 ENTER RESULTS
   const handleEnterResults = async (test) => {
     setSelectedTest(test.test_id);
@@ -91,7 +102,31 @@ function ViewPatients({ setAuth, goDashboard }) {
     setReport(res.data);
     setParameters([]);
   };
+const handlePrint = () => {
+  const printContent = document.getElementById("report-section").innerHTML;
 
+  const newWindow = window.open("", "", "width=800,height=600");
+  newWindow.document.write(`
+    <html>
+      <head>
+        <title>Lab Report</title>
+        <style>
+          body { font-family: Arial; padding: 20px; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid black; padding: 8px; text-align: left; }
+          h2 { text-align: center; }
+        </style>
+      </head>
+      <body>
+        <h2>LAB REPORT</h2>
+        ${printContent}
+      </body>
+    </html>
+  `);
+
+  newWindow.document.close();
+  newWindow.print();
+};
   const filtered = patients.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
     p.phone.includes(search) ||
@@ -100,27 +135,35 @@ function ViewPatients({ setAuth, goDashboard }) {
 
   return (
     <>
-      <Navbar setAuth={setAuth} />
+      <Navbar setAuth={setAuth} showLogout={true} />
 
       <div style={{ padding: "20px" }}>
         <h2>Patients List</h2>
 
         {/* SEARCH */}
-        <input
-          type="text"
-          placeholder="Search by id or name or phone"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{
-            padding: "10px",
-            width: "300px",
-            marginBottom: "20px",
-            borderRadius: "6px",
-            border: "1px solid #ccc"
-          }}
-        />
+      <Box
+  display="flex"
+  alignItems="center"
+  gap={2}
+  mb={2}
+>
+  <TextField
+    label="Search by ID / Name / Phone"
+    variant="outlined"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    size="small"
+    sx={{ width: 300 }}
+  />
 
-        <button onClick={goDashboard}>⬅ Back</button>
+  <Button
+    variant="outlined"
+    startIcon={<ArrowBackIcon />}
+    onClick={goDashboard}
+  >
+    Back
+  </Button>
+</Box>
 
         {/* TABLE */}
         <table border="1" cellPadding="10" style={{ width: "100%" }}>
@@ -158,8 +201,16 @@ function ViewPatients({ setAuth, goDashboard }) {
       </div>
 
       {/* 🔥 TESTS POPUP */}
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
-        <DialogTitle>Patient Tests</DialogTitle>
+      <Dialog open={open} onClose={handleClose} fullWidth>
+        <DialogTitle
+  sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+>
+  Patient Tests
+
+  <IconButton onClick={handleClose}>
+    <CloseIcon />
+  </IconButton>
+</DialogTitle>
 
         <DialogContent>
           {/* TEST LIST */}
@@ -206,33 +257,51 @@ function ViewPatients({ setAuth, goDashboard }) {
           )}
 
           {/* 🔥 REPORT VIEW */}
-          {report && (
-            <Box mt={3}>
-              <Typography variant="h6">
-                {report.patient.name} | Age: {report.patient.age}
-              </Typography>
+         {report && (
+  <Box mt={3}>
+    <div id="report-section">
+      <Typography variant="h6">
+        Patient ID: {report.patient.id}
+      </Typography>
+      <Typography>Name: {report.patient.name}</Typography>
+      <Typography>Age: {report.patient.age}</Typography>
+      <Typography>Gender: {report.patient.gender}</Typography>
+      <Typography>Phone: {report.patient.phone}</Typography>
 
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Parameter</TableCell>
-                    <TableCell>Standard</TableCell>
-                    <TableCell>Actual</TableCell>
-                  </TableRow>
-                </TableHead>
+      <br />
 
-                <TableBody>
-                  {report.results.map((r, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{r.parameter_name}</TableCell>
-                      <TableCell>{r.standard_value}</TableCell>
-                      <TableCell>{r.actual_value}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          )}
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Parameter</TableCell>
+            <TableCell>Standard</TableCell>
+            <TableCell>Actual</TableCell>
+          </TableRow>
+        </TableHead>
+
+        <TableBody>
+          {report.results.map((r, i) => (
+            <TableRow key={i}>
+              <TableCell>{r.parameter_name}</TableCell>
+              <TableCell>{r.standard_value}</TableCell>
+              <TableCell>{r.actual_value}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+
+    {/* 🔥 PRINT BUTTON */}
+    <Button
+      variant="contained"
+      color="success"
+      sx={{ mt: 2 }}
+      onClick={handlePrint}
+    >
+      Print Report
+    </Button>
+  </Box>
+)}
         </DialogContent>
       </Dialog>
     </>

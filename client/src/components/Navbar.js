@@ -1,39 +1,26 @@
 import React from "react";
+import { AppBar, Toolbar, Typography, Button } from "@mui/material";
 
-function Navbar({ setAuth }) {
+function Navbar({ setAuth, showLogout = false }) {
   const logout = () => {
     localStorage.removeItem("token");
     setAuth(false);
   };
 
   return (
-    <div style={{
-      background: "#1976d2",
-      color: "white",
-      padding: "20px 16px",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center"
-    }}>
-      <h2 style={{ margin: 0, fontSize: "18px" }}>
-        Lab Management System
-      </h2>
+    <AppBar position="static">
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Typography variant="h6">
+          Lab Management System
+        </Typography>
 
-      <button
-        onClick={logout}
-        style={{
-          background: "#e53935",
-          color: "white",
-          border: "none",
-          padding: "5px 10px",
-          borderRadius: "5px",
-          cursor: "pointer",
-          fontSize: "13px"
-        }}
-      >
-        Logout
-      </button>
-    </div>
+        {showLogout && (
+          <Button color="error" variant="contained" onClick={logout}>
+            Logout
+          </Button>
+        )}
+      </Toolbar>
+    </AppBar>
   );
 }
 

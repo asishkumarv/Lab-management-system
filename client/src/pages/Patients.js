@@ -116,7 +116,7 @@ doc.text(`Time: ${new Date().toLocaleTimeString()}`, 150, 50);
 };
   return (
     <>
-      <Navbar setAuth={setAuth} />
+      <Navbar setAuth={setAuth} showLogout={true} />
 
       <Container maxWidth="md" sx={{ mt: 4 }}>
         <Card elevation={4} sx={{ borderRadius: 3 }}>
