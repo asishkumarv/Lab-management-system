@@ -233,7 +233,10 @@ app.get("/report/:patientId/:testId", async (req, res) => {
     "SELECT * FROM patients WHERE id=$1",
     [patientId]
   );
-
+  const test = await pool.query(
+    "SELECT test_name FROM tests WHERE id=$1",
+    [testId]
+  );
   const results = await pool.query(`
     SELECT tp.parameter_name, tp.standard_value, pr.actual_value
     FROM patient_test_results pr
