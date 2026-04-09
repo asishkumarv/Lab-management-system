@@ -107,14 +107,25 @@ app.get("/dashboard", async (req, res) => {
 });
 
 app.post("/tests", async (req, res) => {
-  const { category, test_name, price } = req.body;
+  const { category, test_name, price, parameters } = req.body;
 
-  const result = await pool.query(
+  // 1. Insert test
+  const test = await pool.query(
     "INSERT INTO tests (category, test_name, price) VALUES ($1,$2,$3) RETURNING *",
     [category, test_name, price]
   );
 
-  res.json(result.rows[0]);
+  const testId = test.rows[0].id;
+
+  // 2. Insert parameters
+  for (let p of parameters) {
+    await pool.query(
+      "INSERT INTO test_parameters (test_id, parameter_name, standard_value) VALUES ($1,$2,$3)",
+      [testId, p.name, p.value]
+    );
+  }
+
+  res.json({ message: "Test + Parameters added" });
 });
 
 app.get("/tests", async (req, res) => {
