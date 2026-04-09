@@ -147,6 +147,8 @@ app.post("/assign-test", async (req, res) => {
 
   res.json({ message: "Assigned" });
 });
+
+//add patient
 app.post("/patients", async (req, res) => {
   const { name, age, gender, phone, tests } = req.body;
 
@@ -175,5 +177,8 @@ res.json({
   message: "Patient + Tests Added",
   patient_id: patientId   // ✅ ADD THIS
 });
+console.log("API RESPONSE:", res.data);
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));

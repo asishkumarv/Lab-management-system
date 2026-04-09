@@ -10,8 +10,9 @@ export const getDashboard = (token) =>
     headers: { Authorization: token },
   });
 
-export const addPatient = (data) =>
-  axios.post(`${API}/patients`, data);
+export const addPatient = async (data) => {
+  return await axios.post(`${API}/patients`, data);
+};
 
 export const getPatients = () =>
   axios.get(`${API}/patients`);
