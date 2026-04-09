@@ -180,5 +180,72 @@ res.json({
 console.log("API RESPONSE:", res.data);
 });
 
+//get patient test
+app.get("/patient-tests/:patientId", async (req, res) => {
+  const { patientId } = req.params;
+
+  const data = await pool.query(`
+    SELECT pt.id, pt.test_id, t.test_name, pt.status
+    FROM patient_tests pt
+    JOIN tests t ON pt.test_id = t.id
+    WHERE pt.patient_id = $1
+  `, [patientId]);
+
+  res.json(data.rows);
+});
+
+app.get("/test-parameters/:testId", async (req, res) => {
+  const { testId } = req.params;
+
+  const data = await pool.query(
+    "SELECT * FROM test_parameters WHERE test_id=$1",
+    [testId]
+  );
+
+  res.json(data.rows);
+});
+
+app.post("/submit-results", async (req, res) => {
+  const { patient_id, test_id, results } = req.body;
+
+  for (let r of results) {
+    await pool.query(
+      `INSERT INTO patient_test_results 
+       (patient_id, test_id, parameter_id, actual_value)
+       VALUES ($1,$2,$3,$4)`,
+      [patient_id, test_id, r.parameter_id, r.value]
+    );
+  }
+
+  // update status
+  await pool.query(
+    "UPDATE patient_tests SET status='done' WHERE patient_id=$1 AND test_id=$2",
+    [patient_id, test_id]
+  );
+
+  res.json({ message: "Results saved" });
+});
+
+app.get("/report/:patientId/:testId", async (req, res) => {
+  const { patientId, testId } = req.params;
+
+  const patient = await pool.query(
+    "SELECT * FROM patients WHERE id=$1",
+    [patientId]
+  );
+
+  const results = await pool.query(`
+    SELECT tp.parameter_name, tp.standard_value, pr.actual_value
+    FROM patient_test_results pr
+    JOIN test_parameters tp ON pr.parameter_id = tp.id
+    WHERE pr.patient_id=$1 AND pr.test_id=$2
+  `, [patientId, testId]);
+
+  res.json({
+    patient: patient.rows[0],
+    results: results.rows
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));

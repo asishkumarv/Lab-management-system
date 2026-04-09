@@ -22,3 +22,15 @@ export const addTest = (data) =>
 
 export const getTests = () =>
   axios.get(`${API}/tests`);
+
+export const getPatientTests = (id) =>
+  axios.get(`${API}/patient-tests/${id}`);
+
+export const getTestParameters = (id) =>
+  axios.get(`${API}/test-parameters/${id}`);
+
+export const submitResults = (data) =>
+  axios.post(`${API}/submit-results`, data);
+
+export const getReport = (pId, tId) =>
+  axios.get(`${API}/report/${pId}/${tId}`);
