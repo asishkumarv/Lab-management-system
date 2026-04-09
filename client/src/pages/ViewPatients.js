@@ -15,10 +15,11 @@ const loadPatients = async () => {
   setPatients(res.data);   // ✅ correct
 };
 
-  const filtered = patients.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.phone.includes(search)
-  );
+const filtered = patients.filter(p =>
+  p.name.toLowerCase().includes(search.toLowerCase()) ||
+  p.phone.includes(search) ||
+  String(p.id).includes(search)   // ✅ FIX
+);
 
   return (
     <>
@@ -30,7 +31,7 @@ const loadPatients = async () => {
         {/* Search */}
         <input
           type="text"
-          placeholder="Search by name or phone"
+          placeholder="Search by id or name or phone"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
