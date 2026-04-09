@@ -127,11 +127,15 @@ const handlePrint = () => {
   newWindow.document.close();
   newWindow.print();
 };
-  const filtered = patients.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.phone.includes(search) ||
-    String(p.id).includes(search)
+const filtered = patients.filter((p) => {
+  const searchText = search.toLowerCase();
+
+  return (
+    (p.name || "").toLowerCase().includes(searchText) ||
+    (p.phone || "").includes(searchText) ||
+    String(p.id || "").includes(searchText)
   );
+});
 
   return (
     <>
