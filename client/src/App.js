@@ -19,7 +19,7 @@ function App() {
   return <Patients setPage={setPage} setAuth={setAuth} />;
 
   if (page === "tests")
-    return <Tests setAuth={setAuth} goDashboard={() => setPage("dashboard")} />;
+    return <Tests setAuth={setAuth} setPage={setPage} />
 
   return <Dashboard
     setAuth={setAuth}

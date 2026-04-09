@@ -1,109 +1,273 @@
 import React, { useEffect, useState } from "react";
 import { addPatient, getTests } from "../api";
+import Navbar from "../components/Navbar";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Grid,
+  // Checkbox,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+   MenuItem
+} from "@mui/material";
 
-function Patients({ setPage }) {
+function Patients({ setPage, setAuth }) {
   const [form, setForm] = useState({});
   const [tests, setTests] = useState([]);
   const [selectedTests, setSelectedTests] = useState([]);
+const [selectedCategory, setSelectedCategory] = useState("");
+const [filteredTests, setFilteredTests] = useState([]);
+const [selectedTestId, setSelectedTestId] = useState("");
+const categories = [...new Set(tests.map(t => t.category))];
 
   useEffect(() => {
-    getTests().then(res => setTests(res.data));
+    getTests().then((res) => setTests(res.data));
   }, []);
 
-  // ✅ CLEAN toggle (NO total logic here)
-  const toggleTest = (id) => {
-    setSelectedTests(prev =>
-      prev.includes(id)
-        ? prev.filter(t => t !== id)
-        : [...prev, id]
-    );
-  };
+  // const toggleTest = (id) => {
+  //   setSelectedTests((prev) =>
+  //     prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+  //   );
+  // };
+const handleCategoryChange = (category) => {
+  setSelectedCategory(category);
 
-  // ✅ CALCULATE TOTAL (CORRECT WAY)
+  const filtered = tests.filter(t => t.category === category);
+  setFilteredTests(filtered);
+
+  setSelectedTestId(""); // reset test dropdown
+};
+const addSelectedTest = () => {
+  if (!selectedTestId) return;
+
+  if (!selectedTests.includes(selectedTestId)) {
+    setSelectedTests([...selectedTests, selectedTestId]);
+  }
+};
   const total = tests
-    .filter(t => selectedTests.includes(t.id))
+    .filter((t) => selectedTests.includes(t.id))
     .reduce((sum, t) => sum + t.price, 0);
 
-  const submit = async () => {
-    await addPatient({ ...form, tests: selectedTests });
-    alert("Added");
+const submit = async () => {
+  await addPatient({ ...form, tests: selectedTests });
+
+  generatePDF();   // ✅ generate PDF here
+
+  alert("Patient Added + PDF Downloaded");
+
+  setPage("dashboard");
+};
+const generatePDF = () => {
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  doc.text("LAB MANAGEMENT SYSTEM", 60, 20);
+
+  doc.setFontSize(12);
+
+  doc.text(`Name: ${form.name || ""}`, 20, 40);
+  doc.text(`Age: ${form.age || ""}`, 20, 50);
+  doc.text(`Gender: ${form.gender || ""}`, 20, 60);
+  doc.text(`Phone: ${form.phone || ""}`, 20, 70);
+
+  const selected = tests.filter(t => selectedTests.includes(t.id));
+
+  const tableData = selected.map((t, i) => [
+    i + 1,
+    t.category,
+    t.test_name,
+    `Rs. ${t.price}`
+  ]);
+
+  autoTable(doc, {
+    startY: 90,
+    head: [["#", "Category", "Test Name", "Price"]],
+    body: tableData,
+  });
+
+  doc.text(`Total: Rs. ${total}`, 150, doc.lastAutoTable.finalY + 10);
+
+  // 👉 PRINT instead of download
+  const pdfBlob = doc.output("blob");
+  const url = URL.createObjectURL(pdfBlob);
+
+  const printWindow = window.open(url);
+
+  printWindow.onload = () => {
+    printWindow.print();
   };
-
+};
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Add Patient</h2>
+    <>
+      <Navbar setAuth={setAuth} />
 
-      <input
-        placeholder="Name"
-        onChange={e => setForm({ ...form, name: e.target.value })}
-      /><br />
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <Card elevation={4} sx={{ borderRadius: 3 }}>
+          <CardContent>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              Add Patient
+            </Typography>
 
-      <input
-        placeholder="Age"
-        onChange={e => setForm({ ...form, age: e.target.value })}
-      /><br />
+            {/* Patient Details */}
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Name"
+                  onChange={(e) =>
+                    setForm({ ...form, name: e.target.value })
+                  }
+                />
+              </Grid>
 
-      <input
-        placeholder="Gender"
-        onChange={e => setForm({ ...form, gender: e.target.value })}
-      /><br />
+              <Grid item xs={3}>
+                <TextField
+                  fullWidth
+                  label="Age"
+                  type="number"
+                  onChange={(e) =>
+                    setForm({ ...form, age: e.target.value })
+                  }
+                />
+              </Grid>
 
-      <input
-        placeholder="Phone"
-        onChange={e => setForm({ ...form, phone: e.target.value })}
-      /><br />
+              <Grid item xs={3}>
+                <TextField
+                  fullWidth
+                  label="Gender"
+                  onChange={(e) =>
+                    setForm({ ...form, gender: e.target.value })
+                  }
+                />
+              </Grid>
 
-      <h3>Select Tests</h3>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="Phone"
+                  onChange={(e) =>
+                    setForm({ ...form, phone: e.target.value })
+                  }
+                />
+              </Grid>
+            </Grid>
 
-      {tests.map(t => (
-        <div key={t.id} style={{ marginBottom: "5px" }}>
-          <input
-            type="checkbox"
-            checked={selectedTests.includes(t.id)}
-            onChange={() => toggleTest(t.id)}
-          />
-          <span style={{ marginLeft: "8px" }}>
-            {t.test_name} - ₹{t.price}
-          </span>
-        </div>
-      ))}
 
-      <br />
 
-      <h3>Selected Tests</h3>
+{/* Select Tests (Dropdown UI) */}
+<Box mt={4}>
+  <Typography variant="h6" gutterBottom>
+    Select Tests
+  </Typography>
 
-      <ul>
+  {/* Category Dropdown */}
+  <TextField
+    select
+    fullWidth
+    label="Select Category"
+    value={selectedCategory}
+    onChange={(e) => handleCategoryChange(e.target.value)}
+    sx={{ mb: 2 }}
+  >
+    {categories.map((cat, i) => (
+      <MenuItem key={i} value={cat}>
+        {cat}
+      </MenuItem>
+    ))}
+  </TextField>
+
+  {/* Test Dropdown */}
+  <TextField
+    select
+    fullWidth
+    label="Select Test"
+    value={selectedTestId}
+    onChange={(e) => setSelectedTestId(Number(e.target.value))}
+    sx={{ mb: 2 }}
+    disabled={!selectedCategory}
+  >
+    {filteredTests.map((t) => (
+      <MenuItem key={t.id} value={t.id}>
+        {t.test_name} - ₹{t.price}
+      </MenuItem>
+    ))}
+  </TextField>
+
+  <Button variant="contained" onClick={addSelectedTest}>
+    Add Test
+  </Button>
+</Box>
+
+{/* Selected Tests Table */}
+<Box mt={4}>
+  <Typography variant="h6">Selected Tests</Typography>
+
+  <TableContainer component={Paper} sx={{ mt: 1 }}>
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell>#</TableCell>
+          <TableCell>Category</TableCell>
+          <TableCell>Test Name</TableCell>
+          <TableCell>Price</TableCell>
+        </TableRow>
+      </TableHead>
+
+      <TableBody>
         {tests
-          .filter(t => selectedTests.includes(t.id))
-          .map(t => (
-            <li key={t.id}>
-              {t.test_name} - ₹{t.price}
-            </li>
+          .filter((t) => selectedTests.includes(t.id))
+          .map((t, index) => (
+            <TableRow key={t.id}>
+              <TableCell>{index + 1}</TableCell>
+              <TableCell>{t.category}</TableCell>
+              <TableCell>{t.test_name}</TableCell>
+              <TableCell>₹{t.price}</TableCell>
+            </TableRow>
           ))}
-      </ul>
+      </TableBody>
+    </Table>
+  </TableContainer>
+</Box>
 
-      <h2 style={{ color: "green" }}>
-        Total: ₹{total}
-      </h2>
+{/* Total */}
+<Box mt={3} textAlign="right">
+  <Typography variant="h6" color="green">
+    Total: ₹{total}
+  </Typography>
+</Box>
 
-      <br />
+            {/* Buttons */}
+            <Box mt={4} display="flex"  gap={2}>
 
-      <button onClick={submit}>Submit</button>
 
-      <button
-        style={{
-          marginLeft: "10px",
-          padding: "8px 15px",
-          background: "#1976d2",
-          color: "white",
-          border: "none",
-          borderRadius: "5px"
-        }}
-        onClick={() => setPage("dashboard")}
-      >
-        Back
-      </button>
-    </div>
+<Button variant="contained" onClick={submit}>
+  Submit
+</Button>
+
+<Button
+  variant="outlined"
+  sx={{ ml: 2 }}
+  onClick={() => setPage("dashboard")}
+>
+  Back
+</Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </Container>
+    </>
   );
 }
 
