@@ -260,37 +260,42 @@ const handlePrint = () => {
          {report && (
   <Box mt={3}>
     <div id="report-section">
-      <Typography variant="h6">
-        Patient ID: {report.patient.id}
-      </Typography>
-      <Typography>Name: {report.patient.name}</Typography>
-      <Typography>Age: {report.patient.age}</Typography>
-      <Typography>Gender: {report.patient.gender}</Typography>
-      <Typography>Phone: {report.patient.phone}</Typography>
+  <Typography variant="h5" align="center" gutterBottom>
+    LAB REPORT
+  </Typography>
 
-      <br />
+  <Typography variant="h6">
+    🧪 Test: {report.test_name}
+  </Typography>
 
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Parameter</TableCell>
-            <TableCell>Standard</TableCell>
-            <TableCell>Actual</TableCell>
-          </TableRow>
-        </TableHead>
+  <Typography>Patient ID: {report.patient.id}</Typography>
+  <Typography>Name: {report.patient.name}</Typography>
+  <Typography>Age: {report.patient.age}</Typography>
+  <Typography>Gender: {report.patient.gender}</Typography>
+  <Typography>Phone: {report.patient.phone}</Typography>
 
-        <TableBody>
-          {report.results.map((r, i) => (
-            <TableRow key={i}>
-              <TableCell>{r.parameter_name}</TableCell>
-              <TableCell>{r.standard_value}</TableCell>
-              <TableCell>{r.actual_value}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+  <br />
 
+  <Table>
+    <TableHead>
+      <TableRow>
+        <TableCell>Parameter</TableCell>
+        <TableCell>Standard</TableCell>
+        <TableCell>Actual</TableCell>
+      </TableRow>
+    </TableHead>
+
+    <TableBody>
+      {report.results.map((r, i) => (
+        <TableRow key={i}>
+          <TableCell>{r.parameter_name}</TableCell>
+          <TableCell>{r.standard_value}</TableCell>
+          <TableCell>{r.actual_value}</TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+</div>
     {/* 🔥 PRINT BUTTON */}
     <Button
       variant="contained"

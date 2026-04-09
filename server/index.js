@@ -243,6 +243,7 @@ app.get("/report/:patientId/:testId", async (req, res) => {
 
   res.json({
     patient: patient.rows[0],
+    test_name: test.rows[0].test_name,
     results: results.rows
   });
 });
