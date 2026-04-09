@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getDashboard } from "../api";
 import Navbar from "../components/Navbar";
 
-function Dashboard({ setAuth, goPatients, goTests }) {
+function Dashboard({ setAuth, goPatients, goTests, goViewPatients }) {
   const [data, setData] = useState({});
 
   useEffect(() => {
@@ -69,6 +69,15 @@ function Dashboard({ setAuth, goPatients, goTests }) {
   }}>
     Tests
   </button>
+<button onClick={goViewPatients} style={{
+  padding: "12px 25px",
+  background: "#2196f3",
+  color: "white",
+  border: "none",
+  borderRadius: "8px"
+}}>
+  View Patients
+</button>
 </div>
       </div>
     </>

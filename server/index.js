@@ -171,7 +171,9 @@ app.post("/patients", async (req, res) => {
     );
   }
 
-  res.json({ message: "Patient + Tests Added" });
+res.json({ 
+  message: "Patient + Tests Added",
+  patient_id: patientId   // ✅ ADD THIS
 });
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));

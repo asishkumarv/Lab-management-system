@@ -4,7 +4,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import Tests from "./pages/Tests";
-
+import ViewPatients from "./pages/ViewPatients"; 
 function App() {
   const [auth, setAuth] = useState(!!localStorage.getItem("token"));
   const [page, setPage] = useState("dashboard");
@@ -21,10 +21,18 @@ function App() {
   if (page === "tests")
     return <Tests setAuth={setAuth} setPage={setPage} />
 
+  if (page === "viewPatients")
+  return (
+    <ViewPatients
+      setAuth={setAuth}
+      goDashboard={() => setPage("dashboard")}   // ✅ FIX
+    />
+  );
   return <Dashboard
-    setAuth={setAuth}
-    goPatients={() => setPage("patients")}
-    goTests={() => setPage("tests")}
+  setAuth={setAuth}
+  goPatients={() => setPage("patients")}
+  goTests={() => setPage("tests")}
+  goViewPatients={() => setPage("viewPatients")}
   />;
 }
 

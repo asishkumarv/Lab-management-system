@@ -61,27 +61,32 @@ const addSelectedTest = () => {
     .reduce((sum, t) => sum + t.price, 0);
 
 const submit = async () => {
-  await addPatient({ ...form, tests: selectedTests });
+  const res = await addPatient({ ...form, tests: selectedTests });
 
-  generatePDF();   // ✅ generate PDF here
+  const patientId = res.data.patient_id;  // ✅ get ID
 
-  alert("Patient Added + PDF Downloaded");
+  generatePDF(patientId);  // pass ID
+
+  alert("Patient Added + PDF Generated");
 
   setPage("dashboard");
 };
-const generatePDF = () => {
+//pdf generation with jsPDF
+const generatePDF = (patientId) => {
   const doc = new jsPDF();
 
   doc.setFontSize(18);
   doc.text("LAB MANAGEMENT SYSTEM", 60, 20);
 
   doc.setFontSize(12);
-
+doc.text(`Patient ID: ${patientId}`, 150, 30);
   doc.text(`Name: ${form.name || ""}`, 20, 40);
   doc.text(`Age: ${form.age || ""}`, 20, 50);
   doc.text(`Gender: ${form.gender || ""}`, 20, 60);
   doc.text(`Phone: ${form.phone || ""}`, 20, 70);
-
+doc.setFontSize(10);
+doc.text(`Date: ${new Date().toLocaleDateString()}`, 150, 40);
+doc.text(`Time: ${new Date().toLocaleTimeString()}`, 150, 50);
   const selected = tests.filter(t => selectedTests.includes(t.id));
 
   const tableData = selected.map((t, i) => [
